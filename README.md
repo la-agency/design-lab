@@ -2,13 +2,34 @@
 
 A local visual workspace for designs authored by you and your coding agent. Compare versions on a canvas, resize previews, save favorites, and export email HTML and plain text. Your design files stay in your repository.
 
-Upstream: [la-agency/design-lab](https://github.com/la-agency/design-lab). Start a separate workspace below, or follow [integration and updates](docs/integration.md) to add a local design app to an existing project. To return improvements from your copy, follow [CONTRIBUTING.md](CONTRIBUTING.md).
+Upstream: [la-agency/design-lab](https://github.com/la-agency/design-lab). Add Design Lab inside your existing repository so designs can use your app's real components, styles, and tokens. It runs as its own local app. To return improvements to the studio itself, follow [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Give this repository to your agent
 
-> Read README.md and AGENTS.md. Set up this Design Lab locally, start it, and open it in my browser. Walk me through replacing the sample brand and creating my first design. Preserve the samples until I say otherwise. Run the checks and verify my design in the browser, including email export if applicable.
+Open your existing project with your agent and give it this repository link and prompt:
 
-## Start your own workspace
+> Read Design Lab's README.md, AGENTS.md, and docs/integration.md, along with this project's agent instructions. Add Design Lab inside this repo as a separate local app, following our existing workspace structure. Reuse our UI components, styles, and tokens through shared imports. Preserve our production routes and package-manager setup. Start the studio and open it in my browser. Walk me through our first design with sample data, keeping the included examples until I say otherwise. Run the checks and verify a shared component in the browser, including email export if applicable.
+
+## Add to your existing repo (recommended)
+
+A typical setup looks like this; adapt the paths to your repository:
+
+```text
+your-repo/
+  apps/web/          # production app
+  apps/design-lab/   # local studio and design versions
+  packages/ui/       # components, styles, and tokens both apps import
+```
+
+Both apps use the same source through normal imports. Each design version wraps a component with sample props and any preview providers it needs. Adding the studio does not automatically configure styles, assets, or backend dependencies; the [integration guide](docs/integration.md#share-components-with-your-app) walks through that wiring.
+
+Use **Node 22.14 or newer within Node 22** and **pnpm 10** for the studio. Follow [setup in an existing project](docs/integration.md#agent-setup-in-an-existing-project) to add it without overwriting the host app. A pinned upstream framework dependency keeps studio updates centralized; a copied framework snapshot also works. Both approaches can share your product's code.
+
+Run the studio from its own app directory with `pnpm dev`, then open the URL printed in the terminal (normally **http://127.0.0.1:4204**). Use `pnpm dev --port 4214` if that port is occupied. Shared component edits affect both apps; keep experiments in design versions until you are ready to change the shared implementation.
+
+## Standalone workspace (alternative)
+
+Use this when you have no existing product repository or want an independent evaluation:
 
 1. Open [LA Agency's Design Lab](https://github.com/la-agency/design-lab). On GitHub choose **Use this template → Create a new repository**. Give your repository its own name; keep it private for internal work. A normal clone also works for evaluation. The upstream repository is public; your workspace can be private.
 2. Clone your new repository and open the folder with your coding agent.
@@ -20,7 +41,11 @@ No database, Saasco checkout, environment file, paid service, or AI API key is r
 
 ## Make something
 
-Edit `brand/guidelines.md`, then ask your agent:
+Paths below are relative to the design app directory, such as `apps/design-lab`. Edit `brand/guidelines.md`, then ask your agent:
+
+> Make three pricing-page directions using our existing UI components and tokens. Put the explorations in a new design folder, with sample data. Keep review notes outside the designs.
+
+For email work:
 
 > Make three welcome email directions using my brand. Put them in a new design folder. Keep the designs themselves free of review notes.
 
@@ -31,6 +56,8 @@ Favorites and canvas positions, sizes, groups, and background color are saved in
 For email boards, **HTML** and **Text** download the rendered output. Sending and inbox-client testing happen in your chosen email platform. Verify real links, hosted images, subject/preview text, and personalization before sending. Read [email guidance](docs/emails.md).
 
 ## Commands
+
+Run these from the design app directory. These are the starter's scripts; pinned consumers use the equivalent scripts described in the integration guide.
 
 | Command | Purpose |
 | --- | --- |

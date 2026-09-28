@@ -2,17 +2,17 @@
 
 ## Start here
 
-Read README.md, docs/workspace.md, and the relevant design's brief before editing. For email work also read docs/emails.md. For setup in another project or framework changes read docs/integration.md. For sharing reusable improvements read CONTRIBUTING.md. This is a standalone local studio; do not search for or require the Saasco project.
+Read README.md, docs/workspace.md, and the relevant design's brief before editing. For email work also read docs/emails.md. For setup in another project or framework changes read docs/integration.md. For sharing reusable improvements read CONTRIBUTING.md. The studio runs as its own local app and can live inside an existing product repository; it does not require the Saasco project.
 
 When given only this repository link, help the user end to end:
 
-1. Use upstream `https://github.com/la-agency/design-lab`; it is public. Confirm access separately for any private workspace. Clone into a new directory, or use the user's existing checkout. Do not overwrite an unrelated folder. A teammate starting their own work should use a template-created repository; evaluation can use an ordinary clone.
-2. Verify Node 22 (22.14+) and pnpm 10. Follow README setup. Install with `pnpm install --frozen-lockfile`; do not replace pnpm or regenerate the lockfile merely to work around a mismatch.
+1. Use upstream `https://github.com/la-agency/design-lab`; it is public. Default to adding the studio inside the user's existing product repository as a separate app, following docs/integration.md and that repository's instructions. Confirm the target repository if none is known. Use a temporary upstream checkout as the source; do not add nested Git history or overwrite an unrelated folder. A template-created standalone repository is the alternative when there is no existing product; evaluation can use an ordinary clone.
+2. Verify Node 22 (22.14+) and pnpm 10. Follow README setup. Use `pnpm install --frozen-lockfile` for an unchanged checkout. When adding the studio or shared dependencies to an existing pnpm workspace, update its root lockfile deliberately, review the changes, then verify a frozen install. Do not replace the host's package manager or regenerate a lockfile merely to work around a mismatch.
 3. Start `pnpm dev`, keep the process running, and open its actual local URL in the user's browser. Use a different loopback port when occupied. Check terminal output and an HTTP response before reporting it ready.
 4. Ask for the intended design, brand, and output if missing. Independently inspect the sample project and `brand/guidelines.md`. Do not invent their real company facts or publish/send anything.
 5. Create designs as described below. Preview, check, and iterate. Deliver the local URL, files changed, validation results, and usable exports. Explain any remaining blocker precisely.
 
-When adding Design Lab to another project, default to a separate local app alongside the production app and follow docs/integration.md. Preserve the host's routes, dependencies, credentials, and agent instructions. The GitHub owner changed; the package name and imports remain `@la-agent/design-lab`.
+When adding Design Lab to another project, prefer an app directory in the same repository, such as `apps/design-lab`, with shared UI imports from the host's existing packages. Preserve the host's routes, dependencies, credentials, and agent instructions. Wire required preview styles/providers and sample data explicitly, then verify at least one real shared component renders and updates after a source edit. Shared component edits affect the production app too; keep exploratory variants local until a shared change is intended. Do not automatically restructure the whole product to extract a UI package. The GitHub owner changed; the package name and imports remain `@la-agent/design-lab`.
 
 When a workspace needs a reusable framework fix, keep it separate from workspace content and follow CONTRIBUTING.md to prepare it against current upstream. A template copy has unrelated Git history; do not push its entire branch upstream or merge unrelated histories. Offer the contribution with its validation results; only publish workspace-derived code when authorized. Do not merge an upstream PR just because its checks pass.
 

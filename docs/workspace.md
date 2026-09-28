@@ -1,5 +1,7 @@
 # Workspace conventions
 
+Paths in this guide are relative to the design app directory, typically `apps/design-lab` inside your product repository. To reuse production components, first follow [shared component setup](integration.md#share-components-with-your-app). Design versions can import the same UI packages as the production app and wrap them with sample props and preview providers.
+
 ## Minimal design
 
 Create `designs/my-email/design.json`:
@@ -18,6 +20,8 @@ export default function Email() {
 ```
 
 Use `kind: "web"` for normal React pages. Each version must default-export a component without required props. For an existing component with required props, default-export a wrapper that supplies fictional data. Keep styles/components beside the design; put directly linked assets in `public/`.
+
+Keep experimental variants in the design folder. Editing an imported shared component changes the production app's source as well. Once a direction is chosen, implement the intended reusable change in the shared package and verify both apps. Earlier versions that import that package will reflect its new behavior; version files do not freeze imported dependencies. Git provides historical snapshots.
 
 The terminal watcher discovers changes. Visit `/files/my-email/exploration`. Add `v2.tsx` to create a second board. Versions sort naturally (v2 before v10).
 
