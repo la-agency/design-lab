@@ -2,15 +2,19 @@
 
 ## Start here
 
-Read README.md, docs/workspace.md, and the relevant design's brief before editing. For email work also read docs/emails.md. For framework changes read docs/integration.md. This is a standalone local studio; do not search for or require the Saasco project.
+Read README.md, docs/workspace.md, and the relevant design's brief before editing. For email work also read docs/emails.md. For setup in another project or framework changes read docs/integration.md. For sharing reusable improvements read CONTRIBUTING.md. This is a standalone local studio; do not search for or require the Saasco project.
 
 When given only this repository link, help the user end to end:
 
-1. Confirm private Git access. Clone into a new directory, or use the user's existing checkout. Do not overwrite an unrelated folder. A teammate starting their own work should use a template-created repository; evaluation can use an ordinary clone.
+1. Use upstream `https://github.com/la-agency/design-lab`; it is public. Confirm access separately for any private workspace. Clone into a new directory, or use the user's existing checkout. Do not overwrite an unrelated folder. A teammate starting their own work should use a template-created repository; evaluation can use an ordinary clone.
 2. Verify Node 22 (22.14+) and pnpm 10. Follow README setup. Install with `pnpm install --frozen-lockfile`; do not replace pnpm or regenerate the lockfile merely to work around a mismatch.
 3. Start `pnpm dev`, keep the process running, and open its actual local URL in the user's browser. Use a different loopback port when occupied. Check terminal output and an HTTP response before reporting it ready.
 4. Ask for the intended design, brand, and output if missing. Independently inspect the sample project and `brand/guidelines.md`. Do not invent their real company facts or publish/send anything.
 5. Create designs as described below. Preview, check, and iterate. Deliver the local URL, files changed, validation results, and usable exports. Explain any remaining blocker precisely.
+
+When adding Design Lab to another project, default to a separate local app alongside the production app and follow docs/integration.md. Preserve the host's routes, dependencies, credentials, and agent instructions. The GitHub owner changed; the package name and imports remain `@la-agent/design-lab`.
+
+When a workspace needs a reusable framework fix, keep it separate from workspace content and follow CONTRIBUTING.md to prepare it against current upstream. A template copy has unrelated Git history; do not push its entire branch upstream or merge unrelated histories. Offer the contribution with its validation results; only publish workspace-derived code when authorized. Do not merge an upstream PR just because its checks pass.
 
 ## Ownership and folder rules
 

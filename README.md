@@ -2,13 +2,15 @@
 
 A local visual workspace for designs authored by you and your coding agent. Compare versions on a canvas, resize previews, save favorites, and export email HTML and plain text. Your design files stay in your repository.
 
+Upstream: [la-agency/design-lab](https://github.com/la-agency/design-lab). Start a separate workspace below, or follow [integration and updates](docs/integration.md) to add a local design app to an existing project. To return improvements from your copy, follow [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Give this repository to your agent
 
 > Read README.md and AGENTS.md. Set up this Design Lab locally, start it, and open it in my browser. Walk me through replacing the sample brand and creating my first design. Preserve the samples until I say otherwise. Run the checks and verify my design in the browser, including email export if applicable.
 
 ## Start your own workspace
 
-1. Get access to this private repository from LA Agent. On GitHub choose **Use this template → Create a new repository**. Give your repository its own name; keep it private for internal work. A normal clone also works for evaluation.
+1. Open [LA Agency's Design Lab](https://github.com/la-agency/design-lab). On GitHub choose **Use this template → Create a new repository**. Give your repository its own name; keep it private for internal work. A normal clone also works for evaluation. The upstream repository is public; your workspace can be private.
 2. Clone your new repository and open the folder with your coding agent.
 3. Use **Node 22.14 or newer within Node 22**, and **pnpm 10**. Check `node --version` and `pnpm --version`. If pnpm is missing and Corepack is available, run `corepack enable` then `corepack prepare pnpm@10.0.0 --activate`.
 4. Run `pnpm install --frozen-lockfile`, then `pnpm dev`.
@@ -47,11 +49,13 @@ Writes are intentionally restricted to same-origin local development. A deployed
 
 `studio/` and `bin/` implement the reusable framework. `designs/`, `brand/`, `public/`, `.studio/decisions.json`, and `.studio/layouts.json` are your work. `app/` is a small Next.js host. Generated catalog and preview/export routes are ignored by Git and recreated by `pnpm sync`.
 
-This repository is both the starter and the framework source. Template-created projects initially have a self-contained framework snapshot; they do not automatically receive fixes. A separate application can consume the original framework as a commit-pinned Git dependency, as documented in [integration and updates](docs/integration.md). No package registry login is needed; private Git access is required for that dependency.
+This repository is both the starter and the framework source. Template-created projects initially have a self-contained framework snapshot; they do not automatically receive fixes. A separate application can consume the original framework as a commit-pinned Git dependency, as documented in [integration and updates](docs/integration.md). No package registry login is needed. The package/import name remains `@la-agent/design-lab`; the GitHub organization is `la-agency`.
+
+Keep reusable app fixes separate from your brand, designs, and saved workspace state. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to open an upstream pull request from a template copy, fork, or consuming project, and how other workspaces adopt a merged fix.
 
 ## Troubleshooting
 
-- **Repository not found:** confirm you have access to the LA Agent private repository. If using GitHub CLI, run `gh auth status` and `gh auth setup-git`. Never put a token in a URL or file.
+- **Repository not found:** check the URL and access to your own workspace repository; upstream is `https://github.com/la-agency/design-lab`. For a private workspace using GitHub CLI, run `gh auth status` and `gh auth setup-git`. Never put a token in a URL or file.
 - **No pnpm / wrong Node:** install Node 22 and pnpm 10, then reopen the terminal. Don't substitute npm or yarn.
 - **Port in use:** choose another port. Don't terminate an unfamiliar process.
 - **New design absent:** check the terminal for a manifest error; run `pnpm sync`. When explicitly listing pages, add each new version to one page.
