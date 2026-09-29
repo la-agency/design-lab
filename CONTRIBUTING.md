@@ -8,10 +8,12 @@ Share reusable fixes and improvements to `studio/`, `bin/`, tests, documentation
 
 Keep framework changes in separate commits from design work whenever possible. Read [AGENTS.md](AGENTS.md) and [integration guidance](docs/integration.md) before changing the framework. The package name remains `@la-agent/design-lab`, even though its GitHub owner is `la-agency`.
 
-## Bring a fix back from your copy
+## Agent workflow for a framework improvement
 
-1. Describe the behavior you changed, how to reproduce the original problem, and the upstream SHA your workspace started from (if known). Check whether current upstream already fixes it.
-2. Create a separate checkout of upstream, using a new directory, so your working design project stays intact:
+For pinned consumers, start framework edits in an upstream checkout. The agent handles the checkout, local package test, and PR; the user should not need to manually move patches between repositories. Product designs and shared product components continue to be edited in the product repository.
+
+1. Read the consumer's setup record, dependency manifest, and lockfile to identify its installed upstream SHA. Describe the problem and reproduce it with that version. Check whether current upstream already fixes it; if so, use the update workflow instead of creating another fix.
+2. Reuse a suitable upstream checkout or create one outside the product repository, using a new directory. Start a contribution branch from the current upstream default branch:
 
    ```sh
    git clone https://github.com/la-agency/design-lab.git design-lab-contribution
@@ -21,10 +23,15 @@ Keep framework changes in separate commits from design work whenever possible. R
 
    If you already have an upstream checkout or fork, use a clean branch based on the current upstream default branch instead. Do not reset or discard existing local work.
 
-3. Port only the reusable changes into this checkout. A template-created repository is not a GitHub fork and has unrelated history; do not push its entire branch or merge its history into upstream. Manually port a small fix, or use a reviewed patch of named framework files. Cherry-pick only when the commit is isolated and all its changes belong upstream. Adapt the fix to current upstream instead of overwriting whole directories from an older copy.
-4. For a pinned consumer, make the fix in the upstream checkout, not in `node_modules` or pnpm's store. Build a local package with `pnpm pack --pack-destination /tmp/design-lab-pack` and test that tarball in a disposable copy of the consumer. Keep temporary `file:` dependencies and machine paths out of the final contribution and consumer lockfile.
-5. Add a meaningful regression test for a behavior fix, update any affected documentation, and perform the verification below. Use fictional fixtures rather than copying private workspace content.
-6. Inspect `git diff` and `git status`, stage only intended files, and commit the change. Record any verification that could not be completed.
+3. Make the reusable fix in this upstream branch, including a meaningful regression test for a behavior fix and affected documentation. Do not edit installed `node_modules` or pnpm's store. Use fictional fixtures rather than copying private workspace content. Host-specific integration fixes belong in the product repo; update the starter adapters upstream too only if the issue applies generally.
+4. Run the upstream verification below. Build a local package with `pnpm pack --pack-destination /tmp/design-lab-pack`, noting the actual archive path printed by pnpm. Use a new output directory for each candidate so a cached archive cannot conceal an edit.
+5. Test it in a disposable checkout of the consuming product, including the relevant designs and shared packages. Preserve any uncommitted user work needed for reproduction in that disposable copy without publishing it. Temporarily replace only the design app's framework dependency with `file:/absolute/path/to/the-printed-archive.tgz`; substitute the actual path. Install from the workspace root, run the consumer's checks, and verify the changed behavior in its browser preview. Repack and reinstall for each new candidate. This tests the package as a consumer receives it, including its packaged files.
+6. Inspect the upstream diff, stage intended files, and commit the change. [Open a PR](#open-a-pull-request) from this branch when contribution is authorized. Report the PR URL, upstream commit, tested consumer revision, and any incomplete checks. Keep the original consumer on its existing pin while review is pending; a local test does not mean the improvement is available upstream.
+7. After the PR is merged, verify its actual merged commit SHA (which may differ after squashing). Update the original consumer's Git dependency to that SHA, reinstall, verify a frozen install and the consumer checks/browser path, then commit its manifest, lockfile, and updated setup record. The final consumer diff must contain no temporary `file:` dependency, local checkout path, or test override. Preserve unrelated changes. If review is still pending, leave a clear next step rather than claiming adoption is complete.
+
+## Recover a fix already made in a snapshot
+
+A template-created repository is not a GitHub fork and has unrelated history. If a fix was already made in that copy, use the upstream checkout workflow above and port only its reusable changes. Manually port a small fix, or use a reviewed patch of named framework files. Cherry-pick only when the commit is isolated and all its changes belong upstream. Adapt it to current upstream instead of overwriting whole directories from an older copy. Do not push the product's entire branch or merge unrelated histories. After merge, use the snapshot update procedure or convert the workspace to a pinned consumer.
 
 ## Validate the contribution
 

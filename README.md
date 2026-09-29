@@ -8,7 +8,7 @@ Upstream: [la-agency/design-lab](https://github.com/la-agency/design-lab). Add D
 
 Open your existing project with your agent and give it this repository link and prompt:
 
-> Read Design Lab's README.md, AGENTS.md, and docs/integration.md, along with this project's agent instructions. Add Design Lab inside this repo as a separate local app, following our existing workspace structure. Reuse our UI components, styles, and tokens through shared imports. Preserve our production routes and package-manager setup. Start the studio and open it in my browser. Walk me through our first design with sample data, keeping the included examples until I say otherwise. Run the checks and verify a shared component in the browser, including email export if applicable.
+> Read Design Lab's README.md, AGENTS.md, and docs/integration.md, along with this project's agent instructions. Add Design Lab inside this repo as a separate local app with its framework pinned to an upstream commit, following our existing workspace structure. Reuse our UI components, styles, and tokens through shared imports. Preserve our production routes and package-manager setup. Record the installed revision and update/contribution workflow for future agents. Start the studio and open it in my browser. Walk me through our first design with sample data, keeping the included examples until I say otherwise. Run the checks and verify a shared component in the browser, including email export if applicable.
 
 ## Add to your existing repo (recommended)
 
@@ -79,6 +79,8 @@ Writes are intentionally restricted to same-origin local development. A deployed
 This repository is both the starter and the framework source. Template-created projects initially have a self-contained framework snapshot; they do not automatically receive fixes. A separate application can consume the original framework as a commit-pinned Git dependency, as documented in [integration and updates](docs/integration.md). No package registry login is needed. The package/import name remains `@la-agent/design-lab`; the GitHub organization is `la-agency`.
 
 Keep reusable app fixes separate from your brand, designs, and saved workspace state. [CONTRIBUTING.md](CONTRIBUTING.md) explains how to open an upstream pull request from a template copy, fork, or consuming project, and how other workspaces adopt a merged fix.
+
+For a framework improvement, ask your agent: **“Improve this studio behavior and contribute it upstream.”** It should make the change in a separate upstream checkout, test a local package with your project, and open a PR. After merge, it updates your project's pinned dependency. Your product repo keeps its own Git remote; the framework checkout has the upstream or fork remote. Ordinary design work stays entirely in your product repo. This is an agent workflow, not an automatic synchronization service.
 
 ## Troubleshooting
 

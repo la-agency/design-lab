@@ -23,7 +23,14 @@ Default to a separate local design app inside the existing repo, for example `ap
 
 If the repo is not a pnpm workspace, assess its current structure before introducing one. A standalone studio subdirectory in the same repo is possible, but shared imports need explicit module resolution, dependency, build-root, and host typecheck configuration. Merely placing the folder there does not wire sharing. Do not migrate the host's package manager or move its production app just to install the studio. If a compatible setup would require that wider change, explain the concrete limitation and offer an independent evaluation checkout; do not describe it as working code sharing.
 
-For a self-contained snapshot:
+For the recommended pinned consumer:
+
+1. Inspect a separate upstream checkout and choose a reviewed full commit SHA. Create the design app in an empty directory in the product repository, with its own package name. Follow [Next.js host](#nextjs-host) to copy the authored host adapters/configuration and sample workspace files from that same revision. Install the framework as the pinned Git dependency; do not copy its `studio/` source into the consumer.
+2. Add the app to the existing workspace, configure its scripts and direct dependencies, and wire [shared product components](#share-components-with-your-app). Update the root lockfile deliberately, then verify a frozen install. Keep the product's existing routes and package-manager setup.
+3. Run the host checks/tests and browser verification, including one real shared component and relevant email exports. Start the local studio and deliver its URL. Keep the source checkout separate from the product's Git history.
+4. Record the upstream URL, full installed SHA, design app path/package name, shared packages, and install/check/start commands in the product's documentation. The manifest and lockfile are authoritative for the installed dependency; keep the record aligned when updating. Link the product's agent instructions to this guide and [the framework contribution workflow](../CONTRIBUTING.md#agent-workflow-for-a-framework-improvement). Future agents should start framework fixes in an upstream checkout and ordinary design work in the product repo.
+
+For an intentionally self-contained snapshot instead:
 
 1. Clone upstream into a separate temporary checkout and record `git rev-parse HEAD` as the starting revision in the destination project's documentation. A new independent repository can instead use GitHub's template button.
 2. In an existing project, copy the starter into a new, empty design app directory, excluding `.git`, `node_modules`, `.next`, generated files listed in `.gitignore`, and local environment files. Do not overwrite the production app. Keep `app/`, `studio/`, `bin/`, `studio.config.ts`, the TypeScript/Next configuration, sample designs, brand guidance, public assets, and authored `.studio/` state. Keep README, AGENTS, CONTRIBUTING, and docs with the design app so a future agent has these instructions. Preserve the parent project's instructions.
@@ -32,7 +39,7 @@ For a self-contained snapshot:
 5. Run `pnpm check`, `pnpm test`, and `pnpm smoke` from the design app. Start `pnpm dev` (or `pnpm dev --port 4214`), check its terminal output and HTTP response, and open the actual loopback URL. Follow the browser verification in AGENTS.md. Preserve the sample designs until the user requests their replacement.
 6. Wire and verify a real shared component using the steps below. Record the app path, start command, local URL, starting upstream SHA, shared packages, and whether this is a snapshot or pinned consumer in the host's documentation. Link its agent instructions to the design app's AGENTS.md. Ask for the intended design, brand, and output when absent.
 
-If centralized updates are needed, use the pinned-consumer setup below instead of maintaining copied framework source. There is no command that automatically installs routes into an arbitrary existing app.
+There is no setup command that automatically installs routes into an arbitrary existing app. These are instructions for the coding agent to execute and verify.
 
 ## Share components with your app
 
@@ -141,7 +148,7 @@ Pinned consumers adopt a merged fix by updating the dependency to the merged ups
 
 ## Returning improvements upstream
 
-Follow [CONTRIBUTING.md](../CONTRIBUTING.md) for the complete workflow from a template copy or consuming app: reproduce against current upstream, port only reusable changes, validate, and open a pull request against `la-agency/design-lab`. Fixes in a private workspace or edited `node_modules` do not reach other users automatically.
+Follow [CONTRIBUTING.md](../CONTRIBUTING.md#agent-workflow-for-a-framework-improvement): reproduce the problem, make the fix in a separate upstream checkout, test a packed candidate in a disposable consumer checkout, and open a PR against `la-agency/design-lab`. After merge, update the original consumer to the verified merged SHA and commit its manifest/lockfile. There is no need to transfer a patch when the fix starts in the upstream repository. Porting is the recovery path for fixes already made in a copied snapshot. Fixes in a private workspace or edited `node_modules` do not reach other users automatically.
 
 ## Framework development
 
