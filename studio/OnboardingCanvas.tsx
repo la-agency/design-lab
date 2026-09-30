@@ -1,7 +1,9 @@
 "use client";
 
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+
 import {
-  ArrowUpRight,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
@@ -12,7 +14,6 @@ import {
   Grip,
   MoveDiagonal2,
   ChevronRight,
-  ChevronDown,
   Frame,
   Maximize2,
   Minus,
@@ -24,10 +25,13 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 import { alignBoards, canvasRows } from "./auto-layout";
+import { isAnnotating } from "./preview-annotations";
+import { BoardInspection, InspectionControls } from "./BoardInspection";
 import {
-  initialBoardGroups,
+  restoreBoardGroups,
   moveToGroup,
   toggleGroupRow,
 } from "./board-groups";
@@ -105,7 +109,7 @@ export function CanvasStudy({
                   className={styles.pageTreeRow}
                   data-active={page.id === activePage.id}
                 >
-                  <button
+                  <Button variant="ghost" size="sm"
                     type="button"
                     className={styles.pageDisclosure}
                     aria-label={`${expanded ? "Collapse" : "Expand"} ${page.title}`}
@@ -125,8 +129,8 @@ export function CanvasStudy({
                         transform: expanded ? "rotate(90deg)" : undefined,
                       }}
                     />
-                  </button>
-                  <button
+                  </Button>
+                  <Button variant="ghost" size="sm"
                     type="button"
                     className={styles.pageSelect}
                     title={page.title}
@@ -137,7 +141,7 @@ export function CanvasStudy({
                   >
                     <span>{page.title}</span>
                     <small>{page.boards.length}</small>
-                  </button>
+                  </Button>
                 </div>
                 <div
                   id={`page-boards-${page.id}`}
@@ -145,7 +149,7 @@ export function CanvasStudy({
                   className={styles.pageBoards}
                 >
                   {page.boards.map((board) => (
-                    <button
+                    <Button variant="ghost" size="sm"
                       className={styles.boardLink}
                       title={board.title}
                       type="button"
@@ -163,7 +167,7 @@ export function CanvasStudy({
                     >
                       <Frame size={13} />
                       <span>{board.title}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -201,9 +205,9 @@ function CanvasWorkspace(props: {
       <div role="status">
         {stored.error || "Loading canvas…"}
         {stored.error && (
-          <button type="button" onClick={stored.retry}>
+          <Button variant="ghost" size="sm" type="button" onClick={stored.retry}>
             Retry
-          </button>
+          </Button>
         )}
       </div>
     ) : null;
@@ -260,28 +264,16 @@ function CanvasWorkspaceContent({
       ),
     "Change board size"
   );
-  const [groups, setGroups] = useUndoState(() => {
-    if (!initialLayout) return initialBoardGroups(page);
-    const ids = new Set(page.boards.map((board) => board.id));
-    const seen = new Set<string>();
-    const saved = initialLayout.groups
-      .map((group) => ({
-        ...group,
-        boardIds: group.boardIds.filter((id) => {
-          if (!ids.has(id) || seen.has(id)) return false;
-          seen.add(id);
-          return true;
-        }),
-      }))
-      .filter((group) => group.boardIds.length);
-    const added = page.boards.filter((board) => !seen.has(board.id));
-    return [
-      ...saved,
-      ...(added.length
-        ? [{ name: page.title, boardIds: added.map((board) => board.id) }]
-        : []),
-    ];
-  }, "Change board group");
+  const [groups, setGroups] = useUndoState(
+    () => restoreBoardGroups(page, initialLayout?.groups),
+    "Change board group"
+  );
+  const groupOptions = groups.map((group, index) => ({
+    value: index,
+    label: groups.some((other, otherIndex) => otherIndex !== index && other.name === group.name)
+      ? `${group.name} (row ${index + 1})`
+      : group.name,
+  }));
   const tags = Object.fromEntries(
     groups.flatMap((group) => group.boardIds.map((id) => [id, group.name]))
   );
@@ -329,7 +321,7 @@ function CanvasWorkspaceContent({
       },
     ])
   );
-  function changeTag(id: string, tag: string) {
+  function changeTag(id: string, tag: string | number) {
     const next = moveToGroup(groups, id, tag);
     if (next === groups) {
       return;
@@ -464,7 +456,7 @@ function CanvasWorkspaceContent({
       return;
     }
     function wheel(event: WheelEvent) {
-      if (document.querySelector("dialog:modal")) {
+      if (isAnnotating(document) || document.querySelector("dialog:modal")) {
         return;
       }
       if (scrollBoardControls(event)) {
@@ -559,6 +551,14 @@ function CanvasWorkspaceContent({
     function keydown(event: KeyboardEvent) {
       const { target } = event;
       if (
+        event.defaultPrevented ||
+        isAnnotating(document) ||
+        (target instanceof HTMLElement &&
+          target.closest('[role="combobox"], [role="listbox"]'))
+      ) {
+        return;
+      }
+      if (
         (event.metaKey || event.ctrlKey) &&
         (event.code === "KeyZ" || event.code === "KeyY")
       ) {
@@ -645,14 +645,14 @@ function CanvasWorkspaceContent({
       {favorites.error && (
         <div role="alert" className={styles.favoriteError}>
           {favorites.error}
-          <button
+          <Button variant="ghost" size="sm"
             type="button"
             onClick={() => {
               void favorites.refresh();
             }}
           >
             Retry
-          </button>
+          </Button>
         </div>
       )}
       <header className={styles.toolbar}>
@@ -662,7 +662,7 @@ function CanvasWorkspaceContent({
         </div>
         <div className={styles.zoom}>
           <label className={styles.canvasColour} title="Canvas colour">
-            <input
+            <Input
               type="color"
               aria-label="Canvas colour"
               value={backgroundColour}
@@ -671,24 +671,24 @@ function CanvasWorkspaceContent({
             Canvas
           </label>
           {canvasColour !== null && (
-            <button
+            <Button variant="ghost" size="sm"
               type="button"
               aria-label="Reset canvas colour"
               title="Reset canvas colour"
               onClick={() => setCanvasColour(null)}
             >
               <RotateCcw size={14} />
-            </button>
+            </Button>
           )}
-          <button
+          <Button variant="ghost" size="sm"
             type="button"
             aria-label="Fit all boards"
             title="Fit all boards (Shift + 1)"
             onClick={fitBoards}
           >
             <Scan size={15} />
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm"
             type="button"
             aria-label="Zoom out"
             title="Zoom out (−)"
@@ -696,16 +696,16 @@ function CanvasWorkspaceContent({
             onClick={() => zoomAt(view.zoom / 1.2)}
           >
             <Minus size={15} />
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm"
             type="button"
             onClick={() => zoomAt(1)}
             title="Reset zoom to 100% (Shift + 0)"
             aria-label={`Zoom ${Math.round(view.zoom * 100)}%. Reset to 100%`}
           >
             {Math.round(view.zoom * 100)}%
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm"
             type="button"
             aria-label="Zoom in"
             title="Zoom in (+)"
@@ -713,7 +713,7 @@ function CanvasWorkspaceContent({
             onClick={() => zoomAt(view.zoom * 1.2)}
           >
             <Plus size={15} />
-          </button>
+          </Button>
         </div>
       </header>
       <div className={styles.pageResolution}>
@@ -745,29 +745,29 @@ function CanvasWorkspaceContent({
           }
         />
         <div className={styles.historyControls}>
-          <button
+          <Button variant="ghost" size="sm"
             type="button"
             onClick={history.undo}
             disabled={!history.undoLabel}
             title={`Undo${history.undoLabel ? `: ${history.undoLabel}` : ""} (⌘/Ctrl Z)`}
           >
             <Undo2 size={15} /> Undo
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm"
             type="button"
             onClick={history.redo}
             disabled={!history.redoLabel}
             title="Redo (⌘/Ctrl Shift Z)"
           >
             <Redo2 size={15} /> Redo
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost" size="sm"
             type="button"
             onClick={resetLayout}
             title="Align boards horizontally with explicit row breaks"
           >
             <AlignStartVertical size={15} /> Reset layout
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -782,7 +782,8 @@ function CanvasWorkspaceContent({
           backgroundColor: backgroundColour,
         }}
         onPointerDownCapture={(event) => {
-          if (document.querySelector("dialog:modal")) {
+          if (event.target instanceof Element && event.target.closest("[data-design-inspector]")) return;
+          if (isAnnotating(document) || document.querySelector("dialog:modal")) {
             return;
           }
           const background =
@@ -888,7 +889,8 @@ function CanvasWorkspaceContent({
               zoom={view.zoom}
               position={positions[board.id] ?? { x: 0, y: 0 }}
               tag={tags[board.id] ?? board.id}
-              tags={[...new Set(Object.values(tags))]}
+              groupIndex={groups.findIndex((group) => group.boardIds.includes(board.id))}
+              groupOptions={groupOptions}
               onTagChange={(tag) => changeTag(board.id, tag)}
               snap={(delta) => {
                 const rects = page.boards.map((item) => {
@@ -942,7 +944,8 @@ function LiveBoard({
   neighbours,
   position,
   tag,
-  tags,
+  groupIndex,
+  groupOptions,
   onTagChange,
   onMove,
   size,
@@ -964,8 +967,9 @@ function LiveBoard({
   neighbours: Partial<Record<BoardDirection, string>>;
   position: BoardDelta;
   tag: string;
-  tags: string[];
-  onTagChange: (tag: string) => void;
+  groupIndex: number;
+  groupOptions: { value: number; label: string }[];
+  onTagChange: (tag: string | number) => void;
   onMove: (delta: BoardDelta) => void;
   size: BoardSize;
   setSize: (size: BoardSize) => void;
@@ -1031,6 +1035,7 @@ function LiveBoard({
     onFullscreen(board.id);
   }
   return (
+    <BoardInspection resetKey={`${size.width}-${size.maxHeight}-${revision}-${fullscreen}`}>
     <dialog
       open
       tabIndex={-1}
@@ -1110,7 +1115,7 @@ function LiveBoard({
                   { key: "ArrowDown", label: "Next row", Icon: ArrowDown },
                 ] as const
               ).map(({ key, label, Icon }) => (
-                <button
+                <Button variant="ghost" size="sm"
                   key={key}
                   type="button"
                   aria-label={label}
@@ -1124,12 +1129,12 @@ function LiveBoard({
                   }}
                 >
                   <Icon size={16} />
-                </button>
+                </Button>
               ))}
             </nav>
           </div>
         ) : (
-          <button
+          <Button variant="ghost" size="sm"
             type="button"
             className={styles.dragTitle}
             aria-label={`Move ${board.title}`}
@@ -1153,12 +1158,13 @@ function LiveBoard({
           >
             <Grip size={16} />
             <span></span>
-          </button>
+          </Button>
         )}
         {!fullscreen && (
-          <label className={styles.ideaTag}>
+          <div className={styles.ideaTag}>
             {addingTag ? (
-              <input
+              <Input
+                className="h-9 text-xs md:text-xs"
                 aria-label={`New group for ${board.title}`}
                 autoFocus
                 placeholder="New group"
@@ -1176,36 +1182,33 @@ function LiveBoard({
                 }}
               />
             ) : (
-              <>
-                <select
-                  aria-label={`Group for ${board.title}`}
-                  title={tag}
-                  value={tag}
-                  onChange={(event) => {
-                    if (!event.currentTarget.value) {
+                <Select
+                  value={String(groupIndex)}
+                  onValueChange={(value) => {
+                    if (value === "new-group") {
                       setAddingTag(true);
                       return;
                     }
-                    onTagChange(event.currentTarget.value);
+                    onTagChange(Number(value));
                   }}
                 >
-                  {tags.map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                  <option value="">New group…</option>
-                </select>
-                <ChevronDown
-                  className={styles.groupChevron}
-                  size={14}
-                  aria-hidden="true"
-                />
-              </>
+                  <SelectTrigger className="w-full min-w-0 text-xs" aria-label={`Group for ${board.title}`} title={tag}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="start" onCloseAutoFocus={(event) => {
+                    // The new-group input takes focus when it replaces the trigger.
+                    if (addingTag) event.preventDefault();
+                  }}>
+                    {groupOptions.map(({ value, label }) => (
+                      <SelectItem key={value} value={String(value)}>{label}</SelectItem>
+                    ))}
+                    <SelectItem value="new-group">New group…</SelectItem>
+                  </SelectContent>
+                </Select>
             )}
-          </label>
+          </div>
         )}
-        <button
+        <Button variant="ghost" size="sm"
           type="button"
           className={styles.favoriteButton}
           aria-label={`Favorite ${board.title}`}
@@ -1215,21 +1218,18 @@ function LiveBoard({
           onClick={onFavorite}
         >
           <Star size={18} fill={favorite ? "currentColor" : "none"} />
-        </button>
+        </Button>
         {board.exportUrl && (
           <>
-            <a href={board.exportUrl} title="Download email HTML">
-              HTML
-            </a>
-            <a
-              href={`${board.exportUrl}?format=text`}
-              title="Download plain text"
-            >
-              Text
-            </a>
+            <Button asChild variant="outline" size="sm">
+              <a href={board.exportUrl} title="Download email HTML">HTML</a>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <a href={`${board.exportUrl}?format=text`} title="Download plain text">Text</a>
+            </Button>
           </>
         )}
-        <button
+        <Button variant="ghost" size="sm"
           type="button"
           ref={expand}
           onClick={toggleFullscreen}
@@ -1241,7 +1241,7 @@ function LiveBoard({
           title={fullscreen ? "Exit fullscreen (Esc)" : "Experience fullscreen"}
         >
           {fullscreen ? <X size={18} /> : <Maximize2 size={18} />}
-        </button>
+        </Button>
       </header>
       {fullscreen && favoriteError && (
         <p role="alert" className={styles.favoriteError}>
@@ -1251,14 +1251,14 @@ function LiveBoard({
       {!fullscreen && (
         <div className={styles.boardControls}>
           {!fullscreen && (
-            <button
+            <Button variant="ghost" size="sm"
               type="button"
               aria-label={`Start new row at ${board.title}`}
               aria-pressed={newRow}
               onClick={onNewRow}
             >
               {newRow ? "Join row" : "New row"}
-            </button>
+            </Button>
           )}
 
           {!fullscreen && (
@@ -1268,7 +1268,7 @@ function LiveBoard({
               onChange={setSize}
             />
           )}
-          <button
+          <Button variant="ghost" size="sm"
             type="button"
             aria-label={`Reset ${board.title}`}
             title="Restart demo"
@@ -1279,7 +1279,7 @@ function LiveBoard({
             }}
           >
             <RotateCcw size={14} />
-          </button>
+          </Button>
         </div>
       )}
       <div className={styles.surfaceFrame}>
@@ -1311,7 +1311,7 @@ function LiveBoard({
                 </span>
               </div>
             )}
-            <button
+            <Button variant="ghost" size="sm"
               type="button"
               className={styles.resizeHandle}
               aria-label={`Drag to resize ${board.title}`}
@@ -1319,7 +1319,7 @@ function LiveBoard({
               {...resizeGesture}
             >
               <MoveDiagonal2 size={18} />
-            </button>
+            </Button>
           </>
         )}
       </div>
@@ -1329,12 +1329,11 @@ function LiveBoard({
             {size.width}px ·{" "}
             {size.maxHeight ? `max ${size.maxHeight}px` : "Full height"}
           </span>
-          <span>
-            Live design <ArrowUpRight size={12} />
-          </span>
+          {board.preview && <InspectionControls title={board.title} />}
         </footer>
       )}
     </dialog>
+    </BoardInspection>
   );
 }
 

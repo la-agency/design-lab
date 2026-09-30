@@ -101,6 +101,7 @@ export function discover(root) {
             width,
             height: kind === "email" ? 900 : 1000,
             preview: `/previews/generated/${id}/${version}`,
+            sourcePath: `designs/${id}/versions/${version}.tsx`,
             exportUrl:
               kind === "email" ? `/api/exports/${id}/${version}` : undefined,
           };
@@ -200,7 +201,7 @@ export function syncWorkspace(root = process.cwd()) {
           preview,
           marker +
             template +
-            "export default function Preview() { return <Design />; }\n"
+            `export default function Preview() { return <div data-design-source=${JSON.stringify(`${source}.tsx`)} style={{ display: "contents" }}><Design /></div>; }\n`
         );
     }
   const indexPath = path.join(root, ".studio/generated-routes.json");

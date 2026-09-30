@@ -156,7 +156,7 @@
   font-size: 12px;
   margin: 7px 0 0;
 }
-.boardHeader button {
+.boardHeader > button {
   display: grid;
   place-items: center;
   border: 1px solid var(--lab-line);
@@ -174,29 +174,15 @@
   font-size: 12px;
   flex-wrap: wrap;
 }
-.boardControls select,
-.boardControls input {
-  border: 1px solid var(--lab-line);
-  color: var(--lab-ink);
-  background: var(--lab-panel);
-  border-radius: 5px;
-  height: 30px;
-  padding: 4px 8px;
-}
+
 .boardControls label {
   display: flex;
   align-items: center;
   gap: 5px;
   color: var(--lab-muted);
 }
-.boardControls input {
-  width: 70px;
-}
-.boardControls button {
-  margin-left: auto;
-  cursor: pointer;
-  padding: 8px;
-}
+
+
 .boardSurface {
   container-type: inline-size;
   overflow: auto;
@@ -206,12 +192,16 @@
 }
 .boardFooter {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
   justify-content: space-between;
   margin-top: 14px;
   font-size: 11px;
   color: var(--lab-muted);
 }
-.boardFooter span {
+.boardFooter span,
+.boardFooter a {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -318,6 +308,7 @@
   padding: 8px;
 }
 .resolutionControls {
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -330,40 +321,12 @@
   gap: 5px;
   color: var(--lab-muted);
 }
-.resolutionControls select,
-.resolutionControls input {
-  background: var(--lab-panel);
-  color: var(--lab-ink);
-  border: 1px solid var(--lab-line);
-  border-radius: 5px;
-  height: 32px;
-  padding: 4px 7px;
-}
-.resolutionControls select {
-  max-width: 225px;
-}
-.resolutionControls input {
-  width: 76px;
-}
-.resolutionControls button {
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--lab-line);
-  border-radius: 5px;
-  padding: 5px 9px;
-  margin: 0;
-  cursor: pointer;
-  background: var(--lab-panel);
-}
-.resolutionControls button:hover {
-  background: var(--lab-hover);
-}
-.resolutionControls button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
+
+
+
+
+
+
 @media (max-width: 650px) {
   .pageResolution {
     padding: 10px 12px;
@@ -528,19 +491,9 @@
   flex: 0 1 32%;
   min-width: 0;
 }
-.ideaTag input,
-.ideaTag select {
-  border: 1px solid var(--lab-line);
-  border-radius: 5px;
-  padding: 5px 8px;
-  background: var(--lab-panel);
-  color: var(--lab-ink);
-  min-width: 0;
-  width: 100%;
-  height: 38px;
-  text-overflow: ellipsis;
-}
+
 .designRevision {
+  position: relative;
   height: 100%;
 }
 .designRevision[hidden] {
@@ -780,18 +733,8 @@
 .ideaTag {
   position: relative;
 }
-.ideaTag select {
-  appearance: none;
-  padding-right: 34px;
-  cursor: pointer;
-}
-.groupChevron {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
+
+
 
 .persistenceError {
   position: fixed;

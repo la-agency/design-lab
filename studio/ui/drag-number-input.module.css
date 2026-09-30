@@ -1,0 +1,13 @@
+.input {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.input:focus { cursor: text; }
+.input[data-scrubbing] { cursor: ew-resize; user-select: none; }

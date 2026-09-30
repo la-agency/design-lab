@@ -35,6 +35,7 @@ describe("workspace discovery", () => {
     fixture((root) => {
       const files = syncWorkspace(root);
       expect(files[0].pages[0].boards[0].width).toBe(640);
+      expect(files[0].pages[0].boards[0].sourcePath).toBe("designs/welcome/versions/v1.tsx");
       expect(files[0].final).toBeUndefined();
       const preview = readFileSync(
         path.join(root, "app/previews/generated/welcome/v1/route.ts"),
@@ -85,6 +86,7 @@ describe("workspace discovery", () => {
           path.join(root, "app/previews/generated/welcome/v1/route.ts")
         )
       ).toBe(false);
+      expect(readFileSync(path.join(root, "app/previews/generated/welcome/v1/page.tsx"), "utf8")).toContain('data-design-source="designs/welcome/versions/v1.tsx"');
       expect(
         existsSync(
           path.join(root, "app/previews/generated/welcome/v1/page.tsx")

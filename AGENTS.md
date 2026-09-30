@@ -36,6 +36,7 @@ When a workspace needs a reusable framework fix, follow CONTRIBUTING.md: create 
 5. To assemble a result, create a new version and set `result` to its filename stem. Default to `resultStatus: "wip"`; record its source versions and choices in the brief. Explicit approval allows `resultStatus: "approved"`. Preserve explorations.
 6. Put only the proposed email/page/product UI in previews. Review notes, version labels, export controls, and assembly explanations belong in studio chrome or Markdown.
 7. Use the shared canvas/history/preview APIs instead of building another canvas. Canvas groups align horizontally by default. Dragging a board must not rearrange its neighbors.
+8. Preserve native browser annotations on boards and the optional **Copy element context** / **Copy selection** workflow. Do not add a separate annotation view: native element context has been verified to reach the chat even when the highlight is offset. Treat context delivery and outline alignment as separate checks. Board annotation integration belongs in the shared preview API: map iframe coordinates through canvas scale/pan, keep source context, feature-detect browser APIs, and dispose registrations. Do not invent composer APIs or intercept annotation gestures for panning. Confirm the optional native API actually registered before claiming the custom surface bridge is active; keep the app-owned selector available when it does not. Verify selection bounds at multiple zooms; unit tests alone do not establish browser compatibility. See docs/workspace.md.
 
 ## Verification
 
@@ -50,6 +51,8 @@ Local same-origin development writes only. A hosted production build is read-onl
 Source code is trusted local code executed by the user's development server. Preview iframes isolate styles, not hostile code. Do not offer arbitrary remote code execution or claim sandboxing. Generated email previews prohibit scripts.
 
 ## Code
+
+Use shadcn/ui for all standard studio UI controls. Reuse the checked-in components in `studio/ui/` (currently Button, Input, and the Radix-backed Select); add missing primitives from the official shadcn registry rather than hand-building replacements or using native selects. Keep control styling in those components and shared theme tokens; CSS Modules should handle canvas/layout geometry. Use `Button asChild` for action links and retain semantic Next links for route navigation. Follow `docs/ui.md` for component installation, portals, keyboard behavior, and consumer styling. Web designs should reuse the host's shared shadcn components when available; emails retain server-renderable, email-compatible components. The canvas's native `<dialog>` is fullscreen infrastructure, not a general-purpose modal pattern.
 
 Use pnpm, TypeScript strict mode, named functions and `import type`. No `as any`, secrets, or unrelated dependency changes. Use relative imports within framework modules, explicit package subpaths from a host. Keep preview component imports out of the shared catalog/shell: one static route per version prevents every preview from joining the same module graph. Runtime boundaries do not isolate syntax/compiler failures.
 

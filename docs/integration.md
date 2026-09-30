@@ -129,6 +129,8 @@ Use the installed binary in the consumer's scripts:
 
 Install the host's Next, React, React DOM, TypeScript, and type dependencies using the starter versions as the tested baseline. Keep dependencies imported directly by your designs (for example `@react-email/components` or `lucide-react`) in the host too; do not rely on transitive dependency hoisting. Keep the host's own test/smoke commands, adapting the starter's `bin/smoke.mjs` if needed; `design-lab` exposes only `dev` and `sync`.
 
+The studio uses shadcn/ui with Tailwind v4. Also install the starter's compatible `tailwindcss` and `@tailwindcss/postcss` dev dependencies and copy its `postcss.config.mjs` into the design app (or add the plugin to that app's existing PostCSS configuration). Retain the root import of `@la-agent/design-lab/globals.css`; the stylesheet explicitly scans its packaged framework source. See [UI components and consumer styling](ui.md). Do not add this configuration to an unrelated production app.
+
 The stock generator writes a root `app/` directory and uses `/files`, `/previews/generated`, and `/api/exports`; the shell also expects `/api/design-decisions` and `/api/layouts`. It does not automatically support a `src/app` layout, a `/design-lab` mount prefix, or conflicting production routes. Use a separate design app for these cases, or implement and verify custom host adapters. Do not copy the starter's root layout over an existing application's layout.
 
 - Mount `LabShell` with serializable `files` and `config`. Render your workspace children inside it.

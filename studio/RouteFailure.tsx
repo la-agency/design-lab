@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "./ui/button";
+
 /* oxlint-disable next/no-html-link-for-pages -- Full document navigation also recovers from a broken root layout/router. */
 
 import s from "./route-failure.module.css";
@@ -20,10 +22,10 @@ export function RouteFailure({
       </h1>
       <p>Fix the error, then try again. You can still open another design.</p>
       <div>
-        <button onClick={retry}>Try again</button>
-        <a href="/" target={preview ? "_top" : undefined}>
-          Design Lab home
-        </a>
+        <Button onClick={retry}>Try again</Button>
+        <Button asChild variant="ghost">
+          <a href="/" target={preview ? "_top" : undefined}>Design Lab home</a>
+        </Button>
       </div>
     </section>
   );

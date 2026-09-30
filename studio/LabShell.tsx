@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "./ui/button";
+
 import { Grid2X2, Moon, Sun, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -140,7 +142,7 @@ function StudioShell({ children }: { children: ReactNode }) {
 
   return (
     <ThemeContext value={theme}>
-      <div className={styles.shell} data-theme={theme}>
+      <div className={styles.shell} data-theme={theme} data-studio-shell>
         <header className={styles.topbar}>
           <Link href="/" className={styles.brand} aria-label="Design Lab home">
             {config.logo ? (
@@ -175,33 +177,33 @@ function StudioShell({ children }: { children: ReactNode }) {
                 >
                   {files.find((file) => file.id === tab.id)?.title}
                 </Link>
-                <button
+                <Button variant="ghost" size="sm"
                   type="button"
                   onClick={() => closeTab(tab.id)}
                   aria-label={`Close ${files.find((file) => file.id === tab.id)?.title}`}
                 >
                   <X size={12} />
-                </button>
+                </Button>
               </div>
             ))}
           </nav>
           <fieldset className={styles.theme} aria-label="Appearance">
-            <button
+            <Button variant="ghost" size="sm"
               type="button"
               aria-label="Light mode"
               aria-pressed={theme === "light"}
               onClick={() => changeTheme("light")}
             >
               <Sun size={15} />
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost" size="sm"
               type="button"
               aria-label="Dark mode"
               aria-pressed={theme === "dark"}
               onClick={() => changeTheme("dark")}
             >
               <Moon size={15} />
-            </button>
+            </Button>
           </fieldset>
         </header>
         {activeFile && (

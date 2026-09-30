@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "./ui/button";
+
 import Link from "next/link";
 
 import styles from "./lab-error.module.css";
@@ -18,13 +20,13 @@ export function LabError({ error, retry }: LabErrorProps) {
         the next edit.
       </p>
       <div className={styles.actions}>
-        <button type="button" onClick={retry}>
+        <Button type="button" onClick={retry}>
           Retry view
-        </button>
-        <button type="button" onClick={() => window.location.reload()}>
+        </Button>
+        <Button variant="outline" type="button" onClick={() => window.location.reload()}>
           Reload page
-        </button>
-        <Link href="/">Back to files</Link>
+        </Button>
+        <Button asChild variant="ghost"><Link href="/">Back to files</Link></Button>
       </div>
       <details className={styles.details}>
         <summary>Error details</summary>

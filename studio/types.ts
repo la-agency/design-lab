@@ -8,6 +8,7 @@ export type BoardDefinition = {
   groupName?: string;
   newRow?: boolean;
   preview?: string;
+  sourcePath?: string;
   exportUrl?: string;
 };
 export type CanvasPage = {

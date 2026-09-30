@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useCanvasHistory } from "./CanvasHistory";
+import { InspectionOverlay } from "./BoardInspection";
 import { enablePreviewPanning } from "./preview-panning";
+import { isAnnotating, registerPreviewAnnotations } from "./preview-annotations";
 import type { BoardDefinition } from "./types";
 
 import styles from "./homepage-canvas.module.css";
@@ -20,6 +22,9 @@ export function PreviewBoard({
   const contentObserver = useRef<ResizeObserver | null>(null);
   useEffect(() => () => contentObserver.current?.disconnect(), []);
   const preview = useRef<HTMLIFrameElement>(null);
+  useEffect(() => {
+    if (preview.current) return registerPreviewAnnotations(preview.current, board);
+  }, [board]);
   const initializedDocument = useRef<Document | null>(null);
   const initialize = useCallback(
     (iframe: HTMLIFrameElement) => {
@@ -97,6 +102,7 @@ export function PreviewBoard({
       content.addEventListener(
         "wheel",
         (wheel) => {
+          if (isAnnotating(iframe.ownerDocument)) return;
           const localScroll = wheel
             .composedPath()
             .some(
@@ -137,6 +143,7 @@ export function PreviewBoard({
         { passive: false, capture: true }
       );
       content.addEventListener("keydown", (key) => {
+        if (isAnnotating(iframe.ownerDocument)) return;
         const target = content.document.activeElement;
         if (
           (key.ctrlKey || key.metaKey) &&
@@ -232,6 +239,7 @@ export function PreviewBoard({
     }
   }, [initialize]);
   return (
+    <>
     <iframe
       className={styles.preview}
       title={board.title}
@@ -241,5 +249,7 @@ export function PreviewBoard({
       ref={preview}
       onLoad={(event) => initialize(event.currentTarget)}
     />
+    <InspectionOverlay iframe={preview} board={board} />
+    </>
   );
 }

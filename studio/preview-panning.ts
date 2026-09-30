@@ -1,3 +1,5 @@
+import { isAnnotating } from "./preview-annotations";
+
 export function enablePreviewPanning(
   iframe: HTMLIFrameElement,
   document: Document
@@ -11,6 +13,7 @@ export function enablePreviewPanning(
           ? (target as Element)
           : (target as Node | null)?.parentElement;
       if (
+        !isAnnotating(iframe.ownerDocument) &&
         !iframe.closest("dialog:modal") &&
         !element?.closest("input, textarea, [contenteditable=true]")
       ) {
@@ -23,7 +26,7 @@ export function enablePreviewPanning(
   document.addEventListener(
     "pointerdown",
     (event) => {
-      if (iframe.closest("dialog:modal") || event.button !== 0) {
+      if (isAnnotating(iframe.ownerDocument) || iframe.closest("dialog:modal") || event.button !== 0) {
         return;
       }
       const target = event.target as Element | null;
@@ -44,6 +47,10 @@ export function enablePreviewPanning(
   document.addEventListener(
     "pointermove",
     (event) => {
+      if (isAnnotating(iframe.ownerDocument)) {
+        drag = null;
+        return;
+      }
       if (!drag || drag.id !== event.pointerId) {
         return;
       }

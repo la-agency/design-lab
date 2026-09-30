@@ -1,6 +1,10 @@
 "use client";
 
+import { Button } from "./ui/button";
+import { DragNumberInput } from "./ui/drag-number-input";
+
 import { useId } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 import styles from "./canvas.module.css";
 
@@ -67,12 +71,11 @@ export function ResolutionControls({
         onChange({ width, height, maxHeight });
       }}
     >
-      <select
-        aria-label={`Resolution preset for ${label}`}
+      <Select
         value={preset?.label ?? "custom"}
-        onChange={(event) => {
+        onValueChange={(value) => {
           const selected = presets.find(
-            (item) => item.label === event.target.value
+            (item) => item.label === value
           );
           if (selected) {
             onChange({
@@ -83,20 +86,25 @@ export function ResolutionControls({
           }
         }}
       >
-        <option value="custom">{size ? "Custom width" : "Mixed widths"}</option>
-        {presets.map((item) => (
-          <option key={item.label} value={item.label}>
-            {item.label} · {item.width}px
-          </option>
-        ))}
-      </select>
+        <SelectTrigger size="sm" className="w-[180px] text-xs" aria-label={`Resolution preset for ${label}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent position="popper" align="start">
+          <SelectItem value="custom">{size ? "Custom width" : "Mixed widths"}</SelectItem>
+          {presets.map((item) => (
+            <SelectItem key={item.label} value={item.label}>
+              {item.label} · {item.width}px
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <label htmlFor={`${fieldId}-width`}>
         W
-        <input
+        <DragNumberInput
+          className="h-8 w-14 px-2 text-xs md:text-xs tabular-nums"
           id={`${fieldId}-width`}
           name="width"
           aria-label={`Width for ${label}`}
-          type="number"
           required={!onMaxHeightChange || capHeight === undefined}
           min={240}
           max={7680}
@@ -108,11 +116,11 @@ export function ResolutionControls({
       {capHeight !== undefined && (
         <label htmlFor={`${fieldId}-height`}>
           Max H
-          <input
+          <DragNumberInput
+            className="h-8 w-14 px-2 text-xs md:text-xs tabular-nums"
             id={`${fieldId}-height`}
             name="height"
             aria-label={`Max height for ${label}`}
-            type="number"
             required
             min={240}
             max={7680}
@@ -122,7 +130,7 @@ export function ResolutionControls({
           />
         </label>
       )}
-      <button
+      <Button variant="outline" size="sm" className="text-xs"
         type="button"
         aria-label={`Toggle max height for ${label}`}
         aria-pressed={capHeight !== undefined}
@@ -141,8 +149,8 @@ export function ResolutionControls({
         }}
       >
         {capHeight === undefined ? "Set max height" : "Full height"}
-      </button>
-      <button type="submit">Apply</button>
+      </Button>
+      <Button variant="secondary" size="sm" className="text-xs" type="submit">Apply</Button>
     </form>
   );
 }

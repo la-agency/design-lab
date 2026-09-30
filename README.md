@@ -25,6 +25,8 @@ Both apps use the same source through normal imports. Each design version wraps 
 
 Use **Node 22.14 or newer within Node 22** and **pnpm 10** for the studio. Follow [setup in an existing project](docs/integration.md#agent-setup-in-an-existing-project) to add it without overwriting the host app. A pinned upstream framework dependency keeps studio updates centralized; a copied framework snapshot also works. Both approaches can share your product's code.
 
+This checkout includes `.nvmrc`: with nvm, run `nvm install` once, then `nvm use` in each new terminal before running pnpm. This selects Node 22 for that shell without changing the machine's default. Node 24 is outside this project's currently tested support range; a passing unit test run alone does not establish compatibility. After switching Node versions, run `pnpm install --frozen-lockfile` and restart the studio so its server uses the selected runtime.
+
 Run the studio from its own app directory with `pnpm dev`, then open the URL printed in the terminal (normally **http://127.0.0.1:4204**). Use `pnpm dev --port 4214` if that port is occupied. Shared component edits affect both apps; keep experiments in design versions until you are ready to change the shared implementation.
 
 ## Standalone workspace (alternative)

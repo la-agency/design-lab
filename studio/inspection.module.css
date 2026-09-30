@@ -1,0 +1,7 @@
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 0; }
+.target { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px; }
+.overlay { position: absolute; inset: 0; z-index: 2; cursor: crosshair; overflow: hidden; }
+.outline { position: absolute; pointer-events: none; border: 2px solid #1685ff; background: rgb(22 133 255 / 8%); }
+.outline span { position: absolute; left: -2px; bottom: 100%; padding: 3px 6px; border-radius: 4px 4px 0 0; background: #1685ff; color: white; font: 12px/1.4 Arial, sans-serif; }
+.status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.error { color: var(--destructive); }
