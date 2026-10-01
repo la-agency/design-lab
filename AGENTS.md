@@ -22,7 +22,7 @@ When a workspace needs a reusable framework fix, follow CONTRIBUTING.md: create 
 - `designs/<slug>/versions/<version>.tsx`: default-export one React component that works without required props. Use sample data or a wrapper around a reusable component. Web versions can use hooks with `"use client"`; emails must render on the server without hooks or browser APIs.
 - `designs/<slug>/brief.md`: audience, intent, facts, outstanding decisions. Keep explanation outside the rendered design.
 - `brand/` and `public/`: workspace-owned guidance and browser assets. Public files are visible to browsers; never store secrets there.
-- `.studio/decisions.json` and `.studio/layouts.json`: durable workspace state. Read selections before refining; preserve unrelated records.
+- `.studio/workspace.sqlite`: current favorites, layouts, feedback, collections and audit history. Use `design-lab data` or the shared API for writes; read `docs/data-and-collaboration.md`. Original decisions/layout JSON imports once and must not be used as a second live store. Back up the ignored database, and preserve unrelated records.
 - `studio/` and `bin/`: framework. Ordinary design requests should not require changes here.
 - `app/`: host adapters. Never manually register discovered versions here.
 - `.studio/catalog.ts`, `.studio/generated-routes.json`, `app/previews/generated/`, `app/api/exports/`: generated. Do not edit by hand or commit. Run `pnpm sync` to regenerate. The generator deletes only routes that it previously created and marked.
@@ -38,6 +38,10 @@ When a workspace needs a reusable framework fix, follow CONTRIBUTING.md: create 
 7. Use the shared canvas/history/preview APIs instead of building another canvas. Canvas groups align horizontally by default. Dragging a board must not rearrange its neighbors.
 8. Preserve native browser annotations on boards and the optional **Copy element context** / **Copy selection** workflow. Do not add a separate annotation view: native element context has been verified to reach the chat even when the highlight is offset. Treat context delivery and outline alignment as separate checks. Board annotation integration belongs in the shared preview API: map iframe coordinates through canvas scale/pan, keep source context, feature-detect browser APIs, and dispose registrations. Do not invent composer APIs or intercept annotation gestures for panning. Confirm the optional native API actually registered before claiming the custom surface bridge is active; keep the app-owned selector available when it does not. Verify selection bounds at multiple zooms; unit tests alone do not establish browser compatibility. See docs/workspace.md.
 
+## Launch support
+
+The former launch-specific JSON editor and preview framework have been rolled back. Do not restore `kind: "launch"` or `init-launch`. Future launch work should use this database layer for drafts/review, reusable definitions in Git, shared channel data and explicit revision-bound human approval. See `docs/data-and-collaboration.md`. Keep missing real media explicit and credentials out of records.
+
 ## Verification
 
 Run `pnpm check`, `pnpm test`, and `pnpm smoke` after implementation. The smoke check starts and stops its own server on port 4298; it reads previews/exports without modifying saved state. Do one full browser pass after the work is complete; if it finds a bug, fix it and recheck that path. For a new design verify file discovery, every affected version, desktop/mobile width, fullscreen, theme controls, and absence of terminal/browser errors. For framework changes also verify favorites survive reload, layout saving, undo/redo, tabs, and a fresh checkout install. For emails verify downloaded HTML matches preview HTML, plain text is readable, and no localhost asset URLs remain in a deliverable.
@@ -46,7 +50,7 @@ A browser preview is not proof of Gmail/Outlook/Apple Mail rendering. State whic
 
 ## Storage and runtime limits
 
-Local same-origin development writes only. A hosted production build is read-only. JSON writes are serialized and replaced atomically within one server process; run one writable server per workspace. Git owns durable history. Undo and interactive component state are session-local. Do not share a data folder between processes, claim multi-user conflict handling, or disable origin/host checks to make a deployment editable.
+Local same-origin development writes only. A hosted production build is read-only. SQLite transactions coordinate review-state writes; use expected revisions and stable request IDs. Run one development server per workspace. Git owns source history; the database owns review history and needs backups. Undo and interactive component state are session-local. Do not share the database over a network drive, claim cross-machine synchronization or authenticated users, or disable origin/host checks to make a deployment editable.
 
 Source code is trusted local code executed by the user's development server. Preview iframes isolate styles, not hostile code. Do not offer arbitrary remote code execution or claim sandboxing. Generated email previews prohibit scripts.
 

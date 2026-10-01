@@ -99,7 +99,7 @@ Replace FULL_COMMIT_SHA with a real reviewed 40-character commit from the reposi
 
 Set `transpilePackages: ["@la-agent/design-lab"]` in next.config.mjs. Use the same React version as the host to avoid duplicate React instances. The framework ships TypeScript and CSS Modules and is compiled by Next.
 
-The package exposes explicit subpaths: shell, canvas, preview, history, types, files, workspace, decisions, layouts, error, route-error, globals.css, and sync. See package.json for their source files and types.
+The package exposes explicit subpaths: shell, canvas, preview, history, types, files, workspace, decisions, layouts, error, route-error, data, globals.css, and sync. See package.json for their source files and types.
 
 The Git package includes framework source, binaries, and documentation; it does **not** scaffold the starter's app adapters, designs, or configuration into your host. Use a checkout of the same pinned revision as the reference for those files. Rename the consumer's own package to its project name before adding the dependency, so it does not shadow `@la-agent/design-lab`.
 
@@ -109,10 +109,10 @@ For the stock folder-discovery setup, retain or adapt these host files:
 | --- | --- |
 | `app/layout.tsx`, `app/page.tsx` | Shell, global CSS, generated catalog, and home view |
 | `app/files/[file]/page.tsx`, `exploration/page.tsx`, `final/page.tsx` | Design navigation and canvas/result views |
-| `app/api/design-decisions/route.ts`, `app/api/layouts/route.ts` | Local state handlers using the Node.js runtime |
+| `app/api/design-decisions/route.ts`, `app/api/layouts/route.ts`, `app/api/workspace/route.ts` | Local state handlers using the Node.js runtime |
 | `app/error.tsx`, `app/global-error.tsx`, `app/previews/error.tsx` | Error boundaries |
 | `studio.config.ts`, `next.config.mjs`, `tsconfig.json` | Workspace identity, compilation, and type checking |
-| `designs/`, `brand/`, `public/`, authored `.studio/` JSON | Host-owned content and saved state |
+| `designs/`, `brand/`, `public/`, authored `.studio/` JSON | Host-owned content; legacy JSON is imported once into local SQLite |
 | `.gitignore` entries for the generated catalog and routes | Keep generated code out of Git |
 
 Use the installed binary in the consumer's scripts:
@@ -127,7 +127,7 @@ Use the installed binary in the consumer's scripts:
 }
 ```
 
-Install the host's Next, React, React DOM, TypeScript, and type dependencies using the starter versions as the tested baseline. Keep dependencies imported directly by your designs (for example `@react-email/components` or `lucide-react`) in the host too; do not rely on transitive dependency hoisting. Keep the host's own test/smoke commands, adapting the starter's `bin/smoke.mjs` if needed; `design-lab` exposes only `dev` and `sync`.
+Install the host's Next, React, React DOM, TypeScript, and type dependencies using the starter versions as the tested baseline. Keep dependencies imported directly by your designs (for example `@react-email/components` or `lucide-react`) in the host too; do not rely on transitive dependency hoisting. Keep the host's own test/smoke commands, adapting the starter's `bin/smoke.mjs` if needed; `design-lab` exposes `dev`, `sync`, and the `data` commands.
 
 The studio uses shadcn/ui with Tailwind v4. Also install the starter's compatible `tailwindcss` and `@tailwindcss/postcss` dev dependencies and copy its `postcss.config.mjs` into the design app (or add the plugin to that app's existing PostCSS configuration). Retain the root import of `@la-agent/design-lab/globals.css`; the stylesheet explicitly scans its packaged framework source. See [UI components and consumer styling](ui.md). Do not add this configuration to an unrelated production app.
 
@@ -155,3 +155,9 @@ Follow [CONTRIBUTING.md](../CONTRIBUTING.md#agent-workflow-for-a-framework-impro
 ## Framework development
 
 Change studio/ and bin/, update behavior tests and documentation, run pnpm check and pnpm test, then test the starter and a real consuming app. Use a local pnpm pack tarball for pre-publication integration; commit-pin the final Git revision in consumers. A Git dependency must not rely on source outside this repository, a developer's absolute paths, local symlinks, generated output missing from the package, or private environment variables.
+
+## SQLite workspace storage
+
+Adopt the `app/api/workspace/route.ts` adapter with `createWorkspaceHandlers` from `@la-agent/design-lab/data` and the generated catalog, using the Node.js runtime. Keep the existing decisions/layout adapters; their handlers now use the same database. Do not bundle database modules into client code. All three handler factories accept an optional `root` for an isolated workspace. The previous custom JSON `path` option is replaced by `root`. Layout and favorite writes require revisions and `X-Request-Id`; update custom clients alongside the framework.
+
+Use Node 22.14+ within Node 22. No native addon installation is needed. Ignore `.studio/*.sqlite*` and `.studio/backups/` in the consumer; back up the database independently of Git. Read [data and collaboration](data-and-collaboration.md) before migrating or deploying a read-only preview. Remote collaboration is not enabled by this change.

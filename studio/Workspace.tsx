@@ -3,6 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
 
+import { ReviewPanel } from "./data/ReviewPanel";
 import { defaultFilePath } from "./files";
 import { PreviewBoard } from "./HomepageBoard";
 import { CanvasStudy } from "./OnboardingCanvas";
@@ -65,6 +66,7 @@ export function StudioFileCanvas({
     <CanvasStudy
       key={file.id}
       title={file.title}
+      review={<ReviewPanel file={file} />}
       pages={pages}
       initialPageId={initialPageId}
       onPageChange={(id) =>
@@ -89,6 +91,7 @@ export function StudioResult({ file }: { file: StudioFile }) {
     <CanvasStudy
       key={file.id}
       title={file.title}
+      review={<ReviewPanel file={file} />}
       pages={[{ id: "result", title: "Result", boards: [board] }]}
       renderBoard={(item) => (
         <PreviewBoard board={item} src={item.preview ?? ""} />

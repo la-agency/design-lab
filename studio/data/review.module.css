@@ -1,0 +1,17 @@
+.launchers { display: grid; gap: 4px; margin-top: 16px; }
+.panel { position: fixed; z-index: 40; right: 0; top: 108px; bottom: 0; width: min(390px, 100vw); overflow: auto; background: var(--lab-panel); color: var(--lab-ink); border-left: 1px solid var(--lab-line); padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: -8px 0 24px #0002; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.header h2 { font-size: 16px; margin: 0; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.actions input { flex: 1; min-width: 100px; }
+.form { display: grid; gap: 8px; }
+.form > button { justify-self: start; }
+.thread { display: grid; gap: 10px; padding: 14px 0; border-top: 1px solid var(--lab-line); }
+.thread p { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.thread small, .muted { font-size: 12px; color: var(--lab-muted); }
+.thread blockquote { margin: 0; padding-left: 12px; border-left: 2px solid var(--lab-line); font-size: 12px; }
+.context { display: block; font-size: 12px; overflow-wrap: anywhere; }
+.reply { border-left: 2px solid var(--lab-line); padding-left: 12px; }
+.error { color: var(--destructive); font-size: 13px; }
+.event { display: grid; gap: 4px; border-top: 1px solid var(--lab-line); padding-top: 12px; font-size: 12px; overflow-wrap: anywhere; }
+@media(max-width:600px) { .panel { top: 108px; width: 100%; } }

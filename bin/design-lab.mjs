@@ -3,13 +3,17 @@ import { spawn } from "node:child_process";
 import { watch, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 
+import { dataCommand } from "./data.mjs";
 import { syncWorkspace } from "./sync.mjs";
 const command = process.argv[2] ?? "dev";
-if (!["dev", "sync"].includes(command)) {
-  console.error("Usage: design-lab dev [--port 4204] | design-lab sync");
+if (command === "data") {
+  try { await dataCommand(process.argv.slice(3)); }
+  catch (error) { console.error(error.message); process.exitCode = 1; }
+} else if (!["dev", "sync"].includes(command)) {
+  console.error("Usage: design-lab dev [--port 4204] | design-lab sync | design-lab data");
   process.exit(1);
 }
-try {
+if (command !== "data") try {
   const files = syncWorkspace();
   console.log(`Design Lab: ${files.length} design files discovered.`);
 } catch (error) {

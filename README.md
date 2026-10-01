@@ -39,7 +39,7 @@ Use this when you have no existing product repository or want an independent eva
 4. Run `pnpm install --frozen-lockfile`, then `pnpm dev`.
 5. Open **http://127.0.0.1:4204**. If that port is occupied, use `pnpm dev --port 4214` and open that port instead.
 
-No database, Saasco checkout, environment file, paid service, or AI API key is required. Your coding agent runs separately; there is no built-in chat or drag-and-drop email editor.
+No separate database installation, Saasco checkout, environment file, paid service, or AI API key is required. SQLite is built into the supported Node runtime. Your coding agent runs separately; there is no built-in chat or drag-and-drop email editor.
 
 ## Make something
 
@@ -53,9 +53,11 @@ For email work:
 
 A folder containing `design.json` and `versions/*.tsx` becomes a studio file. New versions appear automatically while `pnpm dev` is running. The included welcome email demonstrates email export; the landing page demonstrates ordinary React previews. See [the workspace guide](docs/workspace.md).
 
-Favorites and canvas positions, sizes, groups, and background color are saved in `.studio/decisions.json` and `.studio/layouts.json`. Commit these alongside designs. Tabs/theme stay in this browser; undo history and interactive demo state last for the current session.
+Favorites, canvas layouts, feedback, collections and change history are saved in `.studio/workspace.sqlite`. Existing `.studio/decisions.json` and `.studio/layouts.json` import once and remain as recovery copies. Commit design source; back up the ignored database with `node bin/design-lab.mjs data backup /tmp/design-lab-backup.sqlite`. Tabs/theme stay in this browser; undo history and interactive demo state last for the current session.
 
 For email boards, **HTML** and **Text** download the rendered output. Sending and inbox-client testing happen in your chosen email platform. Verify real links, hosted images, subject/preview text, and personalization before sending. Read [email guidance](docs/emails.md).
+
+Use **Feedback** and **Collections** in the canvas sidebar. Agents can inspect and edit through `design-lab data`; see [data and collaboration](docs/data-and-collaboration.md) for commands, conflict handling and backups. The previous launch-specific feature has been rolled back.
 
 ## Commands
 
@@ -76,7 +78,7 @@ Writes are intentionally restricted to same-origin local development. A deployed
 
 ## Framework vs workspace
 
-`studio/` and `bin/` implement the reusable framework. `designs/`, `brand/`, `public/`, `.studio/decisions.json`, and `.studio/layouts.json` are your work. `app/` is a small Next.js host. Generated catalog and preview/export routes are ignored by Git and recreated by `pnpm sync`.
+`studio/` and `bin/` implement the reusable framework. `designs/`, `brand/`, `public/` and the local `.studio/` database are your work. `app/` is a small Next.js host. Generated catalog and preview/export routes are ignored by Git and recreated by `pnpm sync`.
 
 This repository is both the starter and the framework source. Template-created projects initially have a self-contained framework snapshot; they do not automatically receive fixes. A separate application can consume the original framework as a commit-pinned Git dependency, as documented in [integration and updates](docs/integration.md). No package registry login is needed. The package/import name remains `@la-agent/design-lab`; the GitHub organization is `la-agency`.
 

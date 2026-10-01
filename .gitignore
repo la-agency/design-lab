@@ -9,3 +9,7 @@ app/api/exports/
 .DS_Store
 exports/
 next-env.d.ts
+
+# Local workspace database and recovery files
+.studio/*.sqlite*
+.studio/backups/

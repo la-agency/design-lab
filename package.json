@@ -28,7 +28,8 @@
     "./workspace": "./studio/Workspace.tsx",
     "./globals.css": "./studio/globals.css",
     "./sync": "./bin/sync.mjs",
-    "./layouts": "./studio/layout-store.ts"
+    "./layouts": "./studio/layout-store.ts",
+    "./data": "./studio/data/workspace-store.ts"
   },
   "scripts": {
     "dev": "node bin/design-lab.mjs dev",

@@ -55,6 +55,11 @@ export function InspectionControls({ title }: { title: string }) {
           {copied === selection.target ? <Check size={14} /> : <Copy size={14} />}
           {copied === selection.target ? "Copied" : "Copy selection"}
         </Button>
+        <Button variant="outline" size="sm" className="text-xs" onClick={(event) => {
+          const dialog = event.currentTarget.closest("dialog");
+          if (dialog?.matches(":modal")) dialog.close();
+          window.dispatchEvent(new CustomEvent("studio-feedback-target", { detail: { boardId: selection.target.metadata.Board, selector: selection.target.metadata.Selector, selectedText: selection.target.metadata.Text, sourceRevision: selection.target.metadata.Preview } }));
+        }}>Add feedback</Button>
       </>}
       <span role="status" className={error ? styles.error : styles.status}>
         {error ? "Clipboard unavailable. Use the browser’s Annotate control." : copied === selection?.target ? "Selection copied. Paste into your prompt." : ""}

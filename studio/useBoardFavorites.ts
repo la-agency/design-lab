@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { isDesignDecisions } from "./design-decisions";
 import type { DesignDecision } from "./design-decisions";
+import { announceDataChange, dataHeaders } from "./data/client";
 import { fileForPath } from "./files";
 import { useStudioWorkspace } from "./LabShell";
 
@@ -38,7 +39,9 @@ export function useBoardFavorites(pageId: string, active: boolean) {
       void refresh();
     };
     window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    window.addEventListener("studio-data-changed", onFocus);
+    const timer = setInterval(() => { if (document.visibilityState === "visible") void refresh(); }, 5000);
+    return () => { clearInterval(timer); window.removeEventListener("focus", onFocus); window.removeEventListener("studio-data-changed", onFocus); };
   }, [active, refresh, files]);
 
   const favorites = new Set(
@@ -67,7 +70,7 @@ export function useBoardFavorites(pageId: string, active: boolean) {
       source.hash = `board-${board.id}`;
       const response = await fetch("/api/design-decisions", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: dataHeaders(),
         body: JSON.stringify({
           fileId,
           pageId,
@@ -75,16 +78,19 @@ export function useBoardFavorites(pageId: string, active: boolean) {
           title: board.title,
           source: `${source.pathname}${source.search}${source.hash}`,
           favorite: !favorites.has(board.id),
+          revision: decisions.find((item) => item.fileId === fileId && item.pageId === pageId && item.boardId === board.id)?.revision ?? 0,
         }),
       });
       const value: unknown = await response.json();
       if (!response.ok || !isDesignDecisions(value)) {
-        throw new Error("Save failed");
+        if (response.status === 409) { await refresh(); throw new Error("This favorite changed elsewhere. The latest value is shown; choose again."); }
+        throw new Error("Favorite was not saved. Please retry in the local Studio.");
       }
       setDecisions(value);
       setError("");
-    } catch {
-      setError("Favorite was not saved. Please retry in the local Studio.");
+      announceDataChange();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Favorite was not saved.");
     } finally {
       setSaving(false);
     }

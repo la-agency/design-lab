@@ -58,7 +58,9 @@ export function CanvasStudy({
   title = "Designs",
   initialPageId,
   onPageChange,
+  review,
 }: {
+  review?: ReactNode;
   pages: CanvasPage[];
   title?: string;
   initialPageId?: string;
@@ -174,6 +176,7 @@ export function CanvasStudy({
             );
           })}
         </nav>
+        {review}
         <p className={styles.sidebarHint}>
           Drag boards anywhere.
           <br />
@@ -213,7 +216,7 @@ function CanvasWorkspace(props: {
     ) : null;
   return (
     <>
-      <CanvasHistory>
+      <CanvasHistory key={stored.generation}>
         <CanvasWorkspaceContent
           {...props}
           initialLayout={stored.initial}
@@ -223,6 +226,8 @@ function CanvasWorkspace(props: {
       {props.active && stored.error && (
         <div role="alert" className={styles.persistenceError}>
           {stored.error}
+          <Button size="sm" variant="outline" onClick={stored.download}>Download my layout</Button>
+          <Button size="sm" variant="outline" onClick={stored.retry}>Load saved layout</Button>
         </div>
       )}
     </>

@@ -1,111 +1,38 @@
-import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
-
-import { isDesignDecisions, isFavoriteInput } from "./design-decisions";
-import { isLocalStudioWrite } from "./local-write";
 import type { StudioFile } from "./types";
+import { isFavoriteInput } from "./design-decisions";
+import type { DesignDecision } from "./design-decisions";
+import { isLocalStudioWrite } from "./local-write";
+import { withDatabase, DataError } from "./data/database";
+import { body, dataResponse, failure, identity, requireRequestId, revision } from "./data/http";
 
-export function createDecisionHandlers({
-  files,
-  path = ".studio/decisions.json",
-}: {
-  files: readonly StudioFile[];
-  path?: string;
-}) {
-  const storePath = resolve(process.cwd(), path);
-  let pending: Promise<unknown> = Promise.resolve();
-  async function GET() {
-    try {
-      return Response.json(await readDecisions(), {
-        headers: { "Cache-Control": "no-store" },
-      });
-    } catch {
-      return Response.json(
-        { error: "Could not read design decisions." },
-        { status: 500 }
-      );
-    }
+export function createDecisionHandlers({ files, root = process.cwd() }: { files: readonly StudioFile[]; root?: string }) {
+  function list(db: Parameters<Parameters<typeof withDatabase>[1]>[0], profile: string) {
+    return db.list<DesignDecision>("favorite").filter((item) => item.id.startsWith(`${profile}/`)).map((item) => ({ ...item.value, revision: item.revision }));
   }
-
+  async function GET(request: Request) {
+    try { const { profile } = identity(request); return dataResponse(withDatabase(root, (db) => list(db, profile))); }
+    catch (error) { return failure(error); }
+  }
   async function PUT(request: Request) {
-    if (!isLocalStudioWrite(request)) {
-      return Response.json(
-        { error: "Favorites can only be saved in the local Studio." },
-        { status: 403 }
-      );
-    }
-    let input: unknown;
+    if (!isLocalStudioWrite(request)) return Response.json({ error: "Favorites can only be saved in the local Studio." }, { status: 403 });
     try {
-      const body = await request.text();
-      if (body.length > 4096) {
-        return Response.json({ error: "Decision too large." }, { status: 413 });
-      }
-      input = JSON.parse(body);
-    } catch {
-      return Response.json({ error: "Invalid decision." }, { status: 400 });
-    }
-    if (
-      !isFavoriteInput(input) ||
-      !files.some((file) => file.id === input.fileId)
-    ) {
-      return Response.json({ error: "Invalid decision." }, { status: 400 });
-    }
-    const favorite = input;
-    const save = pending.then(async () => {
-      const decisions = await readDecisions();
-      const index = decisions.findIndex(
-        (item) =>
-          item.fileId === favorite.fileId &&
-          item.pageId === favorite.pageId &&
-          item.boardId === favorite.boardId
-      );
-      const previous = decisions[index];
-      const decision = {
-        fileId: favorite.fileId,
-        pageId: favorite.pageId,
-        boardId: favorite.boardId,
-        title: favorite.title,
-        source: favorite.source,
-        favorite: favorite.favorite,
-        updatedAt: new Date().toISOString(),
-        reason:
-          previous?.reason ??
-          "Favorited in Studio; rationale not yet recorded.",
-        useFor: previous?.useFor ?? "",
-        assembledIn: previous?.assembledIn ?? null,
-      };
-      if (index === -1) {
-        decisions.push(decision);
-      } else {
-        decisions[index] = decision;
-      }
-      const temporary = `${storePath}.${randomUUID()}.tmp`;
-      await mkdir(dirname(storePath), { recursive: true });
-      await writeFile(temporary, `${JSON.stringify(decisions, null, 2)}\n`);
-      await rename(temporary, storePath);
-      return decisions;
-    });
-    pending = save.catch(() => undefined);
-    try {
-      return Response.json(await save);
-    } catch {
-      return Response.json(
-        { error: "Could not save favorite. Please retry." },
-        { status: 500 }
-      );
-    }
+      const input = await body(request, 8000);
+      const expected = revision(input.revision);
+      if (!isFavoriteInput(input) || !files.some((file) => file.id === input.fileId)) throw new DataError("Invalid favorite.");
+      const { actor, profile, requestId } = requireRequestId(request);
+      return dataResponse(withDatabase(root, (db) => db.mutate(requestId, actor, { profile, input }, () => {
+        const id = `${profile}/${input.fileId}/${input.pageId}/${input.boardId}`;
+        const previous = db.get<DesignDecision>("favorite", id);
+        const value: DesignDecision = {
+          fileId: input.fileId, pageId: input.pageId, boardId: input.boardId, title: input.title,
+          source: input.source, favorite: input.favorite, updatedAt: new Date().toISOString(),
+          reason: previous?.value.reason ?? "Favorited in Studio; rationale not yet recorded.",
+          useFor: previous?.value.useFor ?? "", assembledIn: previous?.value.assembledIn ?? null,
+        };
+        db.put("favorite", id, value, actor, requestId, expected);
+        return list(db, profile);
+      })));
+    } catch (error) { return failure(error); }
   }
-
   return { GET, PUT };
-
-  async function readDecisions() {
-    if (!existsSync(storePath)) return [];
-    const value: unknown = JSON.parse(await readFile(storePath, "utf-8"));
-    if (!isDesignDecisions(value)) {
-      throw new Error("Invalid design decisions file");
-    }
-    return value;
-  }
 }

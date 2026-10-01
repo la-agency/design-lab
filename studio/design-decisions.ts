@@ -8,6 +8,7 @@ export type FavoriteInput = {
 };
 
 export type DesignDecision = FavoriteInput & {
+  revision?: number;
   updatedAt: string;
   reason: string;
   useFor: string;
